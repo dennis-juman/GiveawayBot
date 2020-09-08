@@ -31,16 +31,29 @@ module.exports = {
       .then(response => {
         if (['abort', 'stop', 'exit', 'quit', 'cancel'].includes(response.first().content.toLowerCase())) throw new Error()
 
-        // Skip to next step if user doesn't wants to skip to the next question and abort if argument equals to something inside of the array.
-        if (['skip', 'next'].includes(response.first().content.toLowerCase())) return
+        // Skip to next step if user doesn't wants to skip to the next question.
+        if (['skip', 'next'].includes(response.first().content.toLowerCase())) return response
 
         // Continue setup, set prefix into Keyv value store
         msg.client.prefix.set(msg.guild.id, response.first().content)
         return msg.reply(` prefix has been set to \`${response.first().content}\`.`)
       })
-      .catch((err) => {
+      .then(() => {
+        return msg.channel.send('Do you want to set up a role that can access the bot\'s configuration?')
+      })
+      .then(response => {
+        const filter = response => response.author.id === msg.author.id
+        return msg.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ['time'] })
+      })
+      .then(response => {
+        if (['abort', 'stop', 'exit', 'quit', 'cancel', 'madamada'].includes(response.first().content.toLowerCase())) throw new Error()
+        if (response.first().mentions.roles.size) {
+          msg.client.hostRole.set(msg.guild.id, response.first().mentions.roles.first().id)
+          return msg.reply(` role has been set to ${response.first().mentions.roles.first()}.`)
+        }
+      })
+      .catch(() => {
         msg.reply(' setup has been aborted.')
-        console.error(err)
       })
   }
 }
