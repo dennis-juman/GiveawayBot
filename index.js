@@ -18,6 +18,7 @@ const storageAdapter = 'sqlite://database.sqlite3'
 client.prefix = new Keyv(storageAdapter, { namespace: 'prefix' })
 client.channel = new Keyv(storageAdapter, { namespace: 'channel' })
 client.hostRole = new Keyv(storageAdapter, { namespace: 'hostRole' })
+client.adminRole = new Keyv(storageAdapter, { namespace: 'administrator' })
 
 // Bot ready status.
 client.once('ready', () => {
